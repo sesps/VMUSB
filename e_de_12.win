@@ -1,0 +1,68 @@
+Geometry 4,4
+# /home/anasen/VMUSBSpecTcl_devel_extended_11/e_de_12.win Written by @(#)dispwind.cc	2.2 1/28/94  at Wed Nov 11 15:31:24 2015
+
+Window  0,0,"E-DE-HINP1-1-10-PC10"
+   SCALE  AUTO
+   MAPPED 1
+   Expanded 13,433  12,294
+   Rendition Color
+Endwindow
+Window  1,0,"E-DE-HINP1-1-10-PC8"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  2,0,"E-DE-HINP1-1-8-PC10"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  3,0,"E-DE-HINP1-1-8-PC8"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  0,1,"E-DE-HINP1-3-10-PC14"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  1,1,"E-DE-HINP1-3-10-PC16"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  2,1,"E-DE-HINP1-3-8-PC14"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  3,1,"E-DE-HINP1-3-8-PC16"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  0,2,"E-DE-HINP1-4-10-PC2"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  1,2,"E-DE-HINP1-4-10-PC4"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  2,2,"E-DE-HINP1-4-8-PC2"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  3,2,"E-DE-HINP1-4-8-PC4"
+   SCALE  AUTO
+   MAPPED 1
+   Rendition Color
+Endwindow
+Window  0,3,"HINP1.E.01.00"
+   SCALE  AUTO
+   MAPPED 1
+Endwindow

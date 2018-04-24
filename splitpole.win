@@ -1,0 +1,19 @@
+Geometry 1,4
+# /home/splitpole/VMUSBSpecTcl_devel_extended_11/splitpole.win Written by @(#)dispwind.cc	2.2 1/28/94  at Fri Mar  2 10:26:49 2018
+
+Window  0,0,"ADC1.00"
+   SCALE Manual 256
+   MAPPED 1
+Endwindow
+Window  0,1,"ADC1.01"
+   SCALE Manual 256
+   MAPPED 1
+Endwindow
+Window  0,2,"TDC1.00"
+   SCALE Manual 256
+   MAPPED 1
+Endwindow
+Window  0,3,"TDC1.01"
+   SCALE Manual 256
+   MAPPED 1
+Endwindow

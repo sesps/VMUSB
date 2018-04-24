@@ -1,0 +1,12 @@
+The version of 'vmusbspectcl' that came with the lsu did not have support
+for unpacking the the 'marker' module.  This requires creating an unpacker
+for it (CMarkerUnpacker.cpp, .h), adding it to the 'stackunpacker' 
+(CStackUnpacker.cpp), and modifying the tcl scripts that create the 
+treeparameter for it (spectclSetup.tcl) and process the daqconfig.tcl file
+(configFile.tcl).
+
+Note!! I've modified this so that it looks for the daqconfig.tcl file
+in the spectcl home directory, rather than the 'online' ~/config directory.
+
+This has not been tested... I think that it may be necessary to change
+the 'marker' modules default spectrum type (16 bit bitmap)...

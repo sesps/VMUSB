@@ -1,0 +1,8 @@
+hinp create hinp1 0x40000000
+hinp config hinp1 -firmware /home/sand/daq/hinp_usb/xlmxxv_rev511.bit
+stack create event
+stack config event -trigger nim1
+stack config event -delay 25 -modules [list hinp1]
+set HINPChips(hinp1) [list 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 ]
+set adcChannels(hinp1) "hinp1"
+

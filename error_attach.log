@@ -1,0 +1,25 @@
+no files matched glob pattern "1*.*"
+no files matched glob pattern "1*.*"
+    while executing
+"glob -directory /usr/opt/daq 1*.*"
+    (procedure "::formatChooser::Snit_methodring" line 23)
+    invoked from within
+"$self ring $host $ringname"
+    (procedure "::formatChooser::Snit_methodring11" line 6)
+    invoked from within
+"$self $options(-format) $host $other"
+    (procedure "::formatChooser::Snit_methodonlinehelper" line 6)
+    invoked from within
+".hostprompt onlinehelper $host $additionalInfo"
+    (procedure "attachOnline" line 21)
+    invoked from within
+"attachOnline"
+    invoked from within
+".treegui.#topmenu.#topmenu#source invoke active"
+    ("uplevel" body line 1)
+    invoked from within
+"uplevel #0 [list $w invoke active]"
+    (procedure "tk::MenuInvoke" line 50)
+    invoked from within
+"tk::MenuInvoke .treegui.#topmenu.#topmenu#source 1"
+    (command bound to event)

@@ -1,0 +1,172 @@
+#include <config.h>
+#include "CHINP.h"
+#include <Event.h>
+#include <stdint.h>
+#include <TreeParameter.h>
+#include <iostream>
+#include <TCLVariable.h>
+#include <TCLList.h>
+#include <SpecTcl.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+using namespace std;
+
+static uint32_t numChips;
+CHINP::CHINP() {}
+CHINP::~CHINP() {}
+
+/*
+**   unpacker:
+**   when called first tack a tree parameter array
+**   of arrays on to the parameter map
+**   so that we can unpack into it.
+**   data looks like:
+**     Channel count (uint16_t) (>4095 on is an error)
+**     Channel tag  Chipid (8bits) 0 (1bit) (channel# 4bits)
+**        tdc(16), adc(16)
+**      repeat for Channel Count times
+**   Note that when processing ADC/TDC data
+**   If we run off the end of the event, we just silently stop
+**   processing.
+**
+*/
+unsigned int
+CHINP::operator()(CEvent& rEvent,
+		  vector<unsigned short>& event,
+		  unsigned int            offset,
+		  CParamMapCommand::AdcMapping* pMap)
+{
+  CTreeParameterArray*** myParameters = getTree(pMap, rEvent);
+
+  uint32_t  channelId, timeStamp[2], channelCount;
+  uint32_t          wordCount = getLong(event, offset);
+  offset+=2;
+  //
+  // Channel counts > 4095 are error indicators..
+  // just skip the data the VMUSB can't help but read
+  //
+  // mask off upper 16-bit field
+  wordCount &= 0xffff;
+  if (wordCount >4095) {
+    cerr << "Got an error report from " << pMap->name << " "
+	 << channelCount << endl;
+    wordCount &= 0xfff;
+    offset += wordCount*2 +1;
+    return offset;
+  }
+  channelCount  = event[offset];
+  offset += 1;
+  // word count should always = channelCount * 3 + 7
+  if (wordCount < (channelCount*3 + 7)  ||
+      wordCount > (channelCount*3 + 10)) {
+    //if (channelCount != 128) {
+    printf("Event size mismatch wordCount %d  channelCount %d\n",wordCount,channelCount); 
+    return offset += wordCount*2;
+  }
+  // word count should be evenly divisible by 3
+  // loop through groups of 3 words per hit channel
+  printf("word count is %d, channelCount is %d\n",wordCount,channelCount); //uncommented this line MMc 3/7/11
+  timeStamp[0]  = getLong(event, offset);
+  offset+=2;
+  timeStamp[1]  = getLong(event, offset);
+  offset+=2;
+  for (int i =0; i < channelCount; i++) {
+  // get channel tag
+    channelId      = event[offset];
+    //    printf("Channel ID = %x\n",channelId);
+    offset +=1;
+    // now pick up analog data
+    uint32_t e     = event[offset] & 0x3fff;
+    offset += 1;
+    uint32_t time     = event[offset] & 0x3fff;
+    offset += 1;
+ 
+    uint32_t channel   = channelId & 0x0f;
+    uint32_t chip      = (channelId >> 5) & 0xff;
+       printf("chip %d chan %d E %d Time %d\n",chip, channel,e,time);
+    // validate chip ID
+    if (chip > 0 && chip <= numChips) {
+    // map 2 chips on same board as one board with 32 channels
+      if ((chip & 0x0001) == 0) {
+	chip = chip/2;
+	channel = channel + 16;
+      } else {
+	chip = chip/2 + 1;
+      }
+      //      printf("chip now %d chan %d\n",chip, channel);
+      CTreeParameterArray** pChipTree = myParameters[chip-1];
+      CTreeParameterArray*  pEs       = pChipTree[0];
+      CTreeParameterArray*  pTs       = pChipTree[1];
+      
+      (*pEs)[channel] = e;
+      (*pTs)[channel] = time;
+    }
+  }
+  //  printf("offset at end = %d\n",offset);
+  // figure out how much garbage to gobble from end of event
+    if ((wordCount & 0x0001) == 0) {
+      offset= wordCount+2;
+    } else {
+      offset= wordCount+3;  
+    }
+    //            printf("final offset = %d\n",offset);
+  return offset;
+}
+/*
+** Return the extra data that is the tree parameter for this
+** unpacking... creating it if it does not yet exist.
+** ..and binding it to the event.
+*/
+CTreeParameterArray***
+CHINP::getTree(CParamMapCommand::AdcMapping* pMap,
+	       CEvent& rEvent)
+{
+  if (!pMap->extraData) {
+    SpecTcl* api             = SpecTcl::getInstance();
+    CTCLInterpreter *pInterp = api->getInterpreter();
+    string baseName = pMap->name;
+    CTCLVariable HINPChips(pInterp, "HINPChips",false);
+    
+    const char* pChipList = 
+      HINPChips.Get(TCL_GLOBAL_ONLY,
+		    const_cast<char*>(baseName.c_str()));
+    if (!pChipList) {
+      cerr << "HINPChips("<< baseName << ") not defined!!\n";
+      exit(-1);
+    }
+    CTCLList ChipList(pInterp, pChipList);
+    StringArray chips;
+    ChipList.Split(chips);
+
+    CTreeParameterArray*** chipArray = 
+      new CTreeParameterArray**[chips.size()];
+    numChips = chips.size();           // leave range of chips for unpacker
+    pMap->extraData = chipArray;
+    
+    // Iterate over the chips making an E and T tree parameter
+    // array.
+    cerr << "PSD GetTree, chips.size = " << chips.size() << endl;
+ 
+    for (int i =0; i < chips.size(); i++) {
+      char chipNumber[100];
+      sprintf(chipNumber, "%02d", atoi(chips[i].c_str()));
+      CTreeParameterArray** teArray = new CTreeParameterArray*[2];
+      chipArray[i] = teArray;
+      string eBaseName = baseName;
+      eBaseName += ".e.";
+      eBaseName += chipNumber;
+      teArray[0] = new CTreeParameterArray(eBaseName,
+				      14, 32, 0);
+      string tBaseName = baseName;
+      tBaseName += ".t.";
+      tBaseName += chipNumber;
+      teArray[1] = new CTreeParameterArray(tBaseName,
+				      14, 32, 0);
+    }
+    
+    CTreeParameter::BindParameters();
+    CTreeParameter::setEvent(rEvent);
+  }
+  return reinterpret_cast<CTreeParameterArray***>(pMap->extraData);
+}
